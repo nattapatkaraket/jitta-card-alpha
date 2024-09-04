@@ -4,13 +4,12 @@ services:
   db:
     image: postgres
     # restart: always
-    # pid: 'container:db'
     env_file:
       - .env
     environment:
       TZ: 'Asia/Bangkok'
       PGTZ: 'Asia/Bangkok'
-    container_name: medcart-db-postgres
+    container_name: jitta-db-postgres
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     ports:
@@ -28,16 +27,13 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
-    # cap_drop:
-    #   - ALL
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
     # restart: always
-    container_name: medcart-backend
-    # pid: 'container:medcart-backend'
+    container_name: jitta-backend
     ports:
       - '3122:3122'
       - '4132:4132'
@@ -58,5 +54,3 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
-    # cap_drop:
-    #   - ALL
