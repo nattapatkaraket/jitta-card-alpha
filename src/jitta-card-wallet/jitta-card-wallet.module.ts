@@ -8,5 +8,6 @@ import { JittaCardWallet } from './entities/jitta-card-wallet.entity';
   imports: [TypeOrmModule.forFeature([JittaCardWallet])],
   providers: [JittaCardWalletService],
   controllers: [JittaCardWalletController],
+  exports: [JittaCardWalletService],
 })
 export class JittaCardWalletModule {}

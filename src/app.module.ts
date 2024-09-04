@@ -6,6 +6,8 @@ import database from './config/database';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { JittaCardWalletModule } from './jitta-card-wallet/jitta-card-wallet.module';
+import { EarnWalletModule } from './earn-wallet/earn-wallet.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { JittaCardWalletModule } from './jitta-card-wallet/jitta-card-wallet.mod
     }),
     UserModule,
     JittaCardWalletModule,
+    EarnWalletModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

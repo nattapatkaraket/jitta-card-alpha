@@ -5,12 +5,16 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
 import { LoginDto } from './dto/login.dto';
+import { JittaCardWalletService } from 'src/jitta-card-wallet/jitta-card-wallet.service';
+import { EarnWalletService } from 'src/earn-wallet/earn-wallet.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    private readonly jittaCardWalletService: JittaCardWalletService,
+    private readonly earnWalletService: EarnWalletService,
   ) {}
 
   async create(user: CreateUserDto): Promise<CommonResponseDto> {
@@ -25,7 +29,17 @@ export class UserService {
     }
     const newUser = this.userRepo.create(user);
     const result = await this.userRepo.save(newUser);
-    if (result) {
+    const createJittaCardWalletResult = await this.jittaCardWalletService.create({
+      userId: result.id,
+    });
+    const createEarnWalletResult = await this.earnWalletService.create({
+      userId: result.id,
+    });
+    if (
+      result &&
+      createJittaCardWalletResult.statusCode === 201 &&
+      createEarnWalletResult.statusCode === 201
+    ) {
       return {
         statusCode: 201,
         message: 'User created successfully.',
@@ -38,7 +52,7 @@ export class UserService {
     }
   }
 
-  async login(user: LoginDto): Promise<CommonResponseDto> {
+  async login(user: LoginDto) {
     const result = await this.userRepo.findOne({
       where: {
         username: user.username,
@@ -47,11 +61,13 @@ export class UserService {
     if (result) {
       return {
         statusCode: 200,
+        userId: result.id,
         message: 'Login successful.',
       };
     } else {
       return {
         statusCode: 401,
+        userId: null,
         message: 'Invalid credentials.',
       };
     }
