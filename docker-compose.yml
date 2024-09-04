@@ -1,0 +1,62 @@
+version: '3.5'
+
+services:
+  db:
+    image: postgres
+    # restart: always
+    # pid: 'container:db'
+    env_file:
+      - .env
+    environment:
+      TZ: 'Asia/Bangkok'
+      PGTZ: 'Asia/Bangkok'
+    container_name: medcart-db-postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    # cap_drop:
+    #   - ALL
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # restart: always
+    container_name: medcart-backend
+    # pid: 'container:medcart-backend'
+    ports:
+      - '3122:3122'
+      - '4132:4132'
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3122']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    # cap_drop:
+    #   - ALL
