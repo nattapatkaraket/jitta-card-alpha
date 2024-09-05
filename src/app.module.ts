@@ -8,6 +8,8 @@ import { UserModule } from './user/user.module';
 import { JittaCardWalletModule } from './jitta-card-wallet/jitta-card-wallet.module';
 import { EarnWalletModule } from './earn-wallet/earn-wallet.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { DebtModule } from './debt/debt.module';
+import { DebtTypeModule } from './debt-type/debt-type.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { TransactionModule } from './transaction/transaction.module';
     JittaCardWalletModule,
     EarnWalletModule,
     TransactionModule,
+    DebtModule,
+    DebtTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
