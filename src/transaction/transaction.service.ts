@@ -228,10 +228,11 @@ export class TransactionService {
         to: body.to,
         toValue: body.toValue,
         transactionType: body.transactionType,
+        earnAmount: roundUpAmount,
       });
       await queryRunner.manager.save(newTransaction);
-      // payment (make payment) logic here
-      // this payment method is just a placeholder
+      // TO-DO payment (make payment) logic here
+      // TO-DO this payment method is just a placeholder
 
       // update balance
       if (jittaCardWallet.isRoundUp) {
@@ -343,7 +344,7 @@ export class TransactionService {
           userId: body.userId,
           total: body.amount,
           paid: 0,
-          debtFrom: body.fromValue,
+          debtFrom: fromWallet.id,
           debtTypeId: body.debtTypeId,
         }),
       ]);
@@ -369,6 +370,7 @@ export class TransactionService {
       },
     });
     if (!debt) return TransactionStatusType.DEBT_NOT_FOUND;
+    if (debt.paid === debt.total) return TransactionStatusType.DEBT_ALREADY_PAID;
 
     // wallet exist
     const fromWallet = await this.jittaCardWalletRepo.findOne({
@@ -406,14 +408,14 @@ export class TransactionService {
       // if true then change paid amount to debt total - paid amount
       if (debt.total - debt.paid < body.amount) body.amount = debt.total - debt.paid;
       await Promise.all([
-        queryRunner.manager.update(JittaCardWallet, body.toValue, {
+        queryRunner.manager.update(JittaCardWallet, fromWallet.id, {
           balance: fromWallet.balance - body.amount,
         }),
-        queryRunner.manager.update(JittaCardWallet, body.fromValue, {
+        queryRunner.manager.update(JittaCardWallet, debtWallet.id, {
           balance: debtWallet.balance + body.amount,
         }),
         // update debt
-        queryRunner.manager.update(Debt, body.debtTypeId, {
+        queryRunner.manager.update(Debt, body.toValue, {
           paid: debt.paid + body.amount,
         }),
       ]);

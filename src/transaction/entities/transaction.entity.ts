@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -45,6 +44,9 @@ export class Transaction {
     default: TransactionType.DEPOSIT,
   })
   transactionType: TransactionType;
+
+  @Column({ default: 0 })
+  earnAmount: number;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

@@ -86,4 +86,8 @@ export const TransactionStatusType = {
     isTransactionSuccess: false,
     message: 'Debt type not found',
   },
+  DEBT_ALREADY_PAID: {
+    isTransactionSuccess: false,
+    message: 'Debt already paid',
+  },
 } as const;

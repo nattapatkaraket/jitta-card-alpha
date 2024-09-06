@@ -19,7 +19,7 @@ export const checkLoanLimit = (
 export const calculateLoanLimit = (earnWallet: EarnWallet, debts: Debt[]): number => {
   // final limit is 50% of balance and round up to 2 decimal place
   const unPaidDebt = totalUnpaidDebt(debts);
-  const limit = Math.ceil(((earnWallet.balance - unPaidDebt) / 2) * 100) / 100;
+  const limit = Math.ceil((earnWallet.balance / 2 - unPaidDebt) * 100) / 100;
   return limit;
 };
 

@@ -11,7 +11,7 @@ export class CreateTransactionDto {
   userId: number;
 
   @ApiProperty({ example: 100, required: true })
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @IsNotEmpty()
   amount: number;
 
