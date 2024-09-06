@@ -22,5 +22,6 @@ import { DebtEntity } from 'src/debt/entities/debt.entity';
   ],
   providers: [TransactionService],
   controllers: [TransactionController],
+  exports: [TransactionService],
 })
 export class TransactionModule {}

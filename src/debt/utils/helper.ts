@@ -3,6 +3,7 @@
 // and calculate with 2 point of decimal (ex. 0.01)
 
 import { JittaCardWallet } from 'src/jitta-card-wallet/entities/jitta-card-wallet.entity';
+import { DebtEntity } from '../entities/debt.entity';
 
 // if the limit has more than 2 decimal point, it will be rounded up (ceiling) to 2 decimal point
 export const checkLoanLimit = (loanAmount: number, jittaWallet: JittaCardWallet): boolean => {
@@ -10,4 +11,8 @@ export const checkLoanLimit = (loanAmount: number, jittaWallet: JittaCardWallet)
   const limit = Math.ceil((jittaWallet.balance / 2) * 100) / 100;
   const result = loanAmount <= limit;
   return result;
+};
+
+export const totalDebt = (debts: DebtEntity[]): number => {
+  return debts.reduce((totalDebt, debt) => totalDebt + debt.total - debt.paid, 0);
 };

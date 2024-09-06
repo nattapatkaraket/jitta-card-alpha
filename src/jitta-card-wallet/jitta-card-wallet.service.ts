@@ -1,20 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JittaCardWallet } from './entities/jitta-card-wallet.entity';
 import { Repository } from 'typeorm';
 import { CreateJittaCardWalletDto } from './dto/create-jitta-card-wallet.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
 import { UpdateJittaCardWalletDto } from './dto/update-jitta-card-wallet.dto';
+import { DisplayResDto } from './dto/display-res.dto';
+import { TransactionService } from 'src/transaction/transaction.service';
+import { DebtService } from 'src/debt/debt.service';
+import { totalDebt } from 'src/debt/utils/helper';
+import { totalJittaBalance } from './utils/helper';
+import { DebtEntity } from 'src/debt/entities/debt.entity';
 
 @Injectable()
 export class JittaCardWalletService {
   constructor(
     @InjectRepository(JittaCardWallet)
     private readonly jittaCardWalletRepo: Repository<JittaCardWallet>,
+    @InjectRepository(DebtEntity)
+    private readonly debtRepo: Repository<DebtEntity>,
+    private readonly transactionService: TransactionService,
   ) {}
 
-  async getByUserId(userId: number): Promise<JittaCardWallet> {
-    return this.jittaCardWalletRepo.findOne({
+  async display(userId: number): Promise<DisplayResDto> {
+    const [jittaCardWallets, transactions, debts] = await Promise.all([
+      this.getByUserId(userId),
+      this.transactionService.getTransactionByUserId(userId),
+      this.debtRepo.find({
+        where: {
+          userId,
+        },
+      }),
+    ]);
+
+    if (jittaCardWallets.length === 0) {
+      return {
+        userId,
+        totalBalance: 0,
+        totalDebt: 0,
+        historys: transactions,
+        debts,
+        jittaCardWallets,
+      };
+    } else {
+      return {
+        userId,
+        totalBalance: totalJittaBalance(jittaCardWallets),
+        totalDebt: totalDebt(debts),
+        historys: transactions,
+        debts,
+        jittaCardWallets,
+      };
+    }
+  }
+
+  async getByUserId(userId: number): Promise<JittaCardWallet[]> {
+    return this.jittaCardWalletRepo.find({
       where: {
         userId,
       },

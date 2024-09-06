@@ -5,6 +5,7 @@ import { CreateJittaCardWalletDto } from './dto/create-jitta-card-wallet.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateJittaCardWalletDto } from './dto/update-jitta-card-wallet.dto';
+import { DisplayResDto } from './dto/display-res.dto';
 
 @ApiTags('jitta-card-wallet')
 @Controller('jitta-card-wallet')
@@ -12,8 +13,13 @@ export class JittaCardWalletController {
   constructor(private readonly jittaCardWalletService: JittaCardWalletService) {}
 
   @Get('user/:userId')
-  async getByUserId(@Param('userId') userId: number): Promise<JittaCardWallet> {
+  async getByUserId(@Param('userId') userId: number): Promise<JittaCardWallet[]> {
     return this.jittaCardWalletService.getByUserId(userId);
+  }
+
+  @Get('display/:userId')
+  async display(@Param('userId') userId: number): Promise<DisplayResDto> {
+    return this.jittaCardWalletService.display(userId);
   }
 
   @Post()

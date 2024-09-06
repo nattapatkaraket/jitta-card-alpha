@@ -25,6 +25,65 @@ export class TransactionController {
      2. EarnWallet
      3. Outside
      4. Debt
+
+     # example 
+     1. deposit: {
+        "userId": 1,
+        "amount": 100,
+        "from": "Outside",
+        "fromValue": -1,
+        "to": "JittaCardWallet",
+        "toValue": 1,
+        "transactionType": "deposit"
+      }
+    2. withdraw: {
+        "userId": 1,
+        "amount": 100,
+        "from": "JittaCardWallet",
+        "fromValue": 1,
+        "to": "Outside",
+        "toValue": -1,
+        "transactionType": "withdraw"
+      }
+    3. pay: {
+        "userId": 1,
+        "amount": 100,
+        "from": "JittaCardWallet",
+        "fromValue": 1,
+        "to": "Outside",
+        "toValue": -1,
+        "transactionType": "pay"
+      }
+    4. transfer: {
+        "userId": 1,
+        "amount": 100,
+        "from": "JittaCardWallet",
+        "fromValue": 1,
+        "to": "JittaCardWallet",
+        "toValue": 2,
+        "transactionType": "transfer"
+      }
+    5. loan: {  
+        "userId": 1,
+        "amount": 100,
+        "from": "JittaCardWallet",
+        // 3 is Jitta Wallet (if -1 means loan from official account => backend auto select the account)
+        "fromValue": 3, 
+        "to": "JittaCardWallet",
+        "toValue": 1,
+        "debtTypeId": 1,
+        "transactionType": "loan"
+      }
+    6. debt payment: {
+        "userId": 1,
+        "amount": 100,
+        "from": "JittaCardWallet",
+        "fromValue": 1,
+        "to": "Debt",
+        "toValue": 1, // debt id
+        "debtTypeId": 1,
+        "transactionType": "debt payment"
+      }
   `,
   })
   @Post()

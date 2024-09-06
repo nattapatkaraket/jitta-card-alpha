@@ -10,5 +10,6 @@ import { UserModule } from 'src/user/user.module';
   imports: [TypeOrmModule.forFeature([DebtEntity]), DebtTypeModule, UserModule],
   providers: [DebtService],
   controllers: [DebtController],
+  exports: [DebtService],
 })
 export class DebtModule {}
