@@ -64,10 +64,7 @@ export class JittaCardWalletService {
       };
     }
 
-    if (body.isRoundUp) jittaCardWallet.isRoundUp = body.isRoundUp;
-    if (body.balance) jittaCardWallet.balance = body.balance;
-    if (body.isMain) jittaCardWallet.isMain = body.isMain;
-    const result = await this.jittaCardWalletRepo.save(jittaCardWallet);
+    const result = await this.jittaCardWalletRepo.update(jittaCardWallet.id, jittaCardWallet);
 
     if (result) {
       return {

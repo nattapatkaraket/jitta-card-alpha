@@ -63,9 +63,7 @@ export class EarnWalletService {
       };
     }
 
-    if (body.balance) earnWallet.balance = body.balance;
-    if (body.isMain) earnWallet.isMain = body.isMain;
-    const result = await this.earnWalletRepo.save(earnWallet);
+    const result = await this.earnWalletRepo.update(earnWallet.id, earnWallet);
 
     if (result) {
       return {

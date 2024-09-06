@@ -4,7 +4,7 @@ import { DebtTypeService } from './debt-type.service';
 import { CreateDebtTypeDto } from './dto/create-debt-type.dto';
 import { DebtTypeEntity } from './entites/debt-type.entity';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
-import { UpdateDeptTypeDto } from './dto/update-dept-type.dto';
+import { UpdateDebtTypeDto } from './dto/update-debt-type.dto';
 import { DeleteDebtTypeDto } from './dto/delete-debt-type.dto';
 
 @ApiTags('debt-type')
@@ -28,7 +28,7 @@ export class DebtTypeController {
   }
 
   @Patch()
-  async update(@Body() body: UpdateDeptTypeDto): Promise<CommonResponseDto> {
+  async update(@Body() body: UpdateDebtTypeDto): Promise<CommonResponseDto> {
     return this.debtTypeService.update(body);
   }
 

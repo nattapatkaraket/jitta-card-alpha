@@ -11,6 +11,7 @@ export class CreateDebtDto {
   @ApiProperty()
   @IsNumber({ maxDecimalPlaces: 2 })
   @IsNotEmpty()
+  @IsPositive()
   paid: number;
 
   @ApiProperty()
@@ -22,5 +23,6 @@ export class CreateDebtDto {
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
+  @IsPositive()
   userId: number;
 }

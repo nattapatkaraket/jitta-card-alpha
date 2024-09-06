@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { DebtTypeEntity } from './entites/debt-type.entity';
 import { CreateDebtTypeDto } from './dto/create-debt-type.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
-import { UpdateDeptTypeDto } from './dto/update-dept-type.dto';
+import { UpdateDebtTypeDto } from './dto/update-debt-type.dto';
 import { DeleteDebtTypeDto } from './dto/delete-debt-type.dto';
 
 @Injectable()
@@ -45,7 +45,7 @@ export class DebtTypeService {
     }
   }
 
-  async update(body: UpdateDeptTypeDto): Promise<CommonResponseDto> {
+  async update(body: UpdateDebtTypeDto): Promise<CommonResponseDto> {
     const { id, ...updateData } = body;
 
     const result = await this.debtTypeRepo.update(id, updateData);
