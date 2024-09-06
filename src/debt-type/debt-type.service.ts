@@ -46,9 +46,7 @@ export class DebtTypeService {
   }
 
   async update(body: UpdateDebtTypeDto): Promise<CommonResponseDto> {
-    const { id, ...updateData } = body;
-
-    const result = await this.debtTypeRepo.update(id, updateData);
+    const result = await this.debtTypeRepo.update(body.id, body);
 
     if (result.affected) {
       return {

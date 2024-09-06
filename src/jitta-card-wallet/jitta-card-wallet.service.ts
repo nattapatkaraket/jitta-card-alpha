@@ -108,7 +108,7 @@ export class JittaCardWalletService {
       };
     }
 
-    const result = await this.jittaCardWalletRepo.update(jittaCardWallet.id, jittaCardWallet);
+    const result = await this.jittaCardWalletRepo.update(jittaCardWallet.id, body);
 
     if (result) {
       return {

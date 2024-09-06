@@ -66,7 +66,7 @@ export class EarnWalletService {
       };
     }
 
-    const result = await this.earnWalletRepo.update(earnWallet.id, earnWallet);
+    const result = await this.earnWalletRepo.update(earnWallet.id, body);
 
     if (result) {
       return {
