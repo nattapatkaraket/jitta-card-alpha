@@ -5,16 +5,49 @@ import { Repository } from 'typeorm';
 import { CreateEarnWalletDto } from './dto/create-earn-wallet.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
 import { UpdateEarnWalletDto } from './dto/update-earn-wallet.dto';
+import { EarnWalletDisplayResDto } from './dto/display-res.dto';
+import { totalEarnBalance } from './utils/helper';
+import { TransactionService } from 'src/transaction/transaction.service';
+import { TransactionType } from 'src/transaction/models/transaction.enum';
 
 @Injectable()
 export class EarnWalletService {
   constructor(
     @InjectRepository(EarnWallet)
     private readonly earnWalletRepo: Repository<EarnWallet>,
+    private readonly transactionService: TransactionService,
   ) {}
 
-  async getByUserId(userId: number): Promise<EarnWallet> {
-    return this.earnWalletRepo.findOne({
+  async display(userId: number): Promise<EarnWalletDisplayResDto> {
+    const [earnWallets, transactions] = await Promise.all([
+      this.getByUserId(userId),
+      this.transactionService.getTransactionByUserId(userId),
+    ]);
+
+    // filter only type pay from transactions
+    const earnTransactions = transactions.filter(
+      (transaction) => transaction.transactionType === TransactionType.PAY,
+    );
+
+    if (earnWallets.length === 0) {
+      return {
+        userId,
+        totalBalance: 0,
+        historys: [],
+        earnWallets,
+      };
+    } else {
+      return {
+        userId,
+        totalBalance: totalEarnBalance(earnWallets),
+        historys: earnTransactions,
+        earnWallets,
+      };
+    }
+  }
+
+  async getByUserId(userId: number): Promise<EarnWallet[]> {
+    return this.earnWalletRepo.find({
       where: {
         userId,
       },
