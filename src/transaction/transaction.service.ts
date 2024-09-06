@@ -277,7 +277,7 @@ export class TransactionService {
     if (!debtType) return TransactionStatusType.DEBT_TYPE_NOT_FOUND;
 
     // wallet exist
-    const [fromWallet, toWallet, debts, earnWallet] = await Promise.all([
+    const [fromWallet, toWallet, debts, earnWallets] = await Promise.all([
       body.fromValue !== -1
         ? this.jittaCardWalletRepo.findOne({
             where: {
@@ -302,21 +302,21 @@ export class TransactionService {
           userId: body.userId,
         },
       }),
-      this.earnWalletRepo.findOne({
+      this.earnWalletRepo.find({
         where: {
-          id: body.toValue,
+          userId: body.userId,
         },
       }),
     ]);
 
     if (!fromWallet || !toWallet) return TransactionStatusType.JITTA_WALLET_NOT_FOUND;
-    if (!earnWallet) return TransactionStatusType.EARN_WALLET_NOT_FOUND;
+    if (earnWallets.length === 0) return TransactionStatusType.EARN_WALLET_NOT_FOUND;
 
     // check balance
     if (fromWallet.balance < body.amount) return TransactionStatusType.INSUFFICIENT_BALANCE;
 
     // check loan limit
-    if (checkLoanLimit(body.amount, earnWallet, debts) === false)
+    if (checkLoanLimit(body.amount, earnWallets, debts) === false)
       return TransactionStatusType.LOAN_LIMIT_EXCEED;
 
     // start transaction

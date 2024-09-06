@@ -5,6 +5,7 @@ import { CreateDebtDto } from './dto/create-debt.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { DebtDisplayResDto } from './dto/debt-display-res.dto';
 
 @ApiTags('debt')
 @Controller('debt')
@@ -19,6 +20,11 @@ export class DebtController {
   @Get(':id')
   async getById(@Param('id') id: number): Promise<Debt> {
     return this.debtService.getById(id);
+  }
+
+  @Get('display/:userId')
+  async display(@Param('userId') userId: number): Promise<DebtDisplayResDto> {
+    return this.debtService.display(userId);
   }
 
   @Get('user/:userId')

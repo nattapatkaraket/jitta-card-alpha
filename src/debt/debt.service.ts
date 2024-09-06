@@ -7,6 +7,10 @@ import { CreateDebtDto } from './dto/create-debt.dto';
 import { DebtTypeService } from 'src/debt-type/debt-type.service';
 import { UserService } from 'src/user/user.service';
 import { UpdateDebtDto } from './dto/update-debt.dto';
+import { DebtDisplayResDto } from './dto/debt-display-res.dto';
+import { EarnWalletService } from 'src/earn-wallet/earn-wallet.service';
+import { totalEarnBalance } from 'src/earn-wallet/utils/helper';
+import { calculateLoanLimit, totalUnpaidDebt } from './utils/helper';
 
 @Injectable()
 export class DebtService {
@@ -15,6 +19,7 @@ export class DebtService {
     private readonly debtRepo: Repository<Debt>,
     private readonly debtTypeService: DebtTypeService,
     private readonly userService: UserService,
+    private readonly earnWalletService: EarnWalletService,
   ) {}
 
   async getAll(): Promise<Debt[]> {
@@ -31,6 +36,29 @@ export class DebtService {
         userId: userId,
       },
     });
+  }
+
+  async display(userId: number): Promise<DebtDisplayResDto> {
+    const [debts, earnWallets] = await Promise.all([
+      this.getByUserId(userId),
+      this.earnWalletService.getByUserId(userId),
+    ]);
+
+    if (earnWallets.length === 0) {
+      return {
+        userId,
+        totalDebt: 0,
+        totalEarnBalance: 0,
+        availableLoanAmount: 0,
+      };
+    }
+
+    return {
+      userId,
+      totalDebt: totalUnpaidDebt(debts),
+      totalEarnBalance: totalEarnBalance(earnWallets),
+      availableLoanAmount: calculateLoanLimit(earnWallets, debts),
+    };
   }
 
   async create(debt: CreateDebtDto): Promise<CommonResponseDto> {
