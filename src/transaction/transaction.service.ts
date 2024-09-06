@@ -15,8 +15,8 @@ import { EarnWallet } from 'src/earn-wallet/entities/earn-wallet.entity';
 import { User } from 'src/user/entities/user.entity';
 import { TransactionStatus } from './models/transaction.interface';
 import { checkLoanLimit } from 'src/debt/utils/helper';
-import { DebtEntity } from 'src/debt/entities/debt.entity';
-import { DebtTypeEntity } from 'src/debt-type/entites/debt-type.entity';
+import { Debt } from 'src/debt/entities/debt.entity';
+import { DebtType } from 'src/debt-type/entites/debt-type.entity';
 
 @Injectable()
 export class TransactionService {
@@ -29,10 +29,10 @@ export class TransactionService {
     private readonly earnWalletRepo: Repository<EarnWallet>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
-    @InjectRepository(DebtTypeEntity)
-    private readonly debtTypeRepo: Repository<DebtTypeEntity>,
-    @InjectRepository(DebtEntity)
-    private readonly debtRepo: Repository<DebtEntity>,
+    @InjectRepository(DebtType)
+    private readonly debtTypeRepo: Repository<DebtType>,
+    @InjectRepository(Debt)
+    private readonly debtRepo: Repository<Debt>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -273,23 +273,46 @@ export class TransactionService {
     if (!debtType) return TransactionStatusType.DEBT_TYPE_NOT_FOUND;
 
     // wallet exist
-    const fromWallet = await this.jittaCardWalletRepo.findOne({
-      where: {
-        id: body.fromValue,
-      },
-    });
-    const toWallet = await this.jittaCardWalletRepo.findOne({
-      where: {
-        id: body.toValue,
-      },
-    });
+    const [fromWallet, toWallet, debts, earnWallet] = await Promise.all([
+      body.fromValue !== -1
+        ? this.jittaCardWalletRepo.findOne({
+            where: {
+              id: body.fromValue,
+            },
+          })
+        : this.jittaCardWalletRepo.findOne({
+            where: {
+              isOfficial: true,
+            },
+            order: {
+              balance: 'DESC',
+            },
+          }),
+      this.jittaCardWalletRepo.findOne({
+        where: {
+          id: body.toValue,
+        },
+      }),
+      this.debtRepo.find({
+        where: {
+          userId: body.userId,
+        },
+      }),
+      this.earnWalletRepo.findOne({
+        where: {
+          id: body.toValue,
+        },
+      }),
+    ]);
+
     if (!fromWallet || !toWallet) return TransactionStatusType.JITTA_WALLET_NOT_FOUND;
+    if (!earnWallet) return TransactionStatusType.EARN_WALLET_NOT_FOUND;
 
     // check balance
     if (fromWallet.balance < body.amount) return TransactionStatusType.INSUFFICIENT_BALANCE;
 
     // check loan limit
-    if (checkLoanLimit(body.amount, fromWallet) === false)
+    if (checkLoanLimit(body.amount, earnWallet, debts) === false)
       return TransactionStatusType.LOAN_LIMIT_EXCEED;
 
     // start transaction
@@ -309,14 +332,14 @@ export class TransactionService {
       await queryRunner.manager.save(newTransaction);
 
       await Promise.all([
-        queryRunner.manager.update(JittaCardWallet, body.toValue, {
-          balance: fromWallet.balance + body.amount,
+        queryRunner.manager.update(JittaCardWallet, fromWallet.id, {
+          balance: fromWallet.balance - body.amount,
         }),
-        queryRunner.manager.update(JittaCardWallet, body.fromValue, {
-          balance: toWallet.balance - body.amount,
+        queryRunner.manager.update(JittaCardWallet, toWallet.id, {
+          balance: toWallet.balance + body.amount,
         }),
         // create debt
-        queryRunner.manager.create(DebtEntity, {
+        queryRunner.manager.save(Debt, {
           userId: body.userId,
           total: body.amount,
           paid: 0,
@@ -390,7 +413,7 @@ export class TransactionService {
           balance: debtWallet.balance + body.amount,
         }),
         // update debt
-        queryRunner.manager.update(DebtEntity, body.debtTypeId, {
+        queryRunner.manager.update(Debt, body.debtTypeId, {
           paid: debt.paid + body.amount,
         }),
       ]);

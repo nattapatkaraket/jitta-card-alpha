@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DebtEntity } from './entities/debt.entity';
+import { Debt } from './entities/debt.entity';
 import { Repository } from 'typeorm';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
 import { CreateDebtDto } from './dto/create-debt.dto';
@@ -11,21 +11,21 @@ import { UpdateDebtDto } from './dto/update-debt.dto';
 @Injectable()
 export class DebtService {
   constructor(
-    @InjectRepository(DebtEntity)
-    private readonly debtRepo: Repository<DebtEntity>,
+    @InjectRepository(Debt)
+    private readonly debtRepo: Repository<Debt>,
     private readonly debtTypeService: DebtTypeService,
     private readonly userService: UserService,
   ) {}
 
-  async getAll(): Promise<DebtEntity[]> {
+  async getAll(): Promise<Debt[]> {
     return this.debtRepo.find();
   }
 
-  async getById(id: number): Promise<DebtEntity> {
+  async getById(id: number): Promise<Debt> {
     return this.debtRepo.findOneBy({ id });
   }
 
-  async getByUserId(userId: number): Promise<DebtEntity[]> {
+  async getByUserId(userId: number): Promise<Debt[]> {
     return this.debtRepo.find({
       where: {
         userId: userId,

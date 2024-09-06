@@ -16,4 +16,9 @@ export class UpdateEarnWalletDto {
   @IsOptional()
   @IsBoolean()
   isMain: boolean;
+
+  @ApiProperty({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  isOfficial: boolean;
 }

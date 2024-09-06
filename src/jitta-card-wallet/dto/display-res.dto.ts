@@ -1,4 +1,4 @@
-import { DebtEntity } from 'src/debt/entities/debt.entity';
+import { Debt } from 'src/debt/entities/debt.entity';
 import { Transaction } from 'src/transaction/entities/transaction.entity';
 import { JittaCardWallet } from '../entities/jitta-card-wallet.entity';
 
@@ -7,6 +7,6 @@ export class DisplayResDto {
   totalBalance: number;
   totalDebt: number;
   historys: Transaction[];
-  debts: DebtEntity[];
+  debts: Debt[];
   jittaCardWallets: JittaCardWallet[];
 }

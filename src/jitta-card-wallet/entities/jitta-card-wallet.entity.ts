@@ -23,6 +23,9 @@ export class JittaCardWallet {
   @Column({ default: false })
   isMain: boolean;
 
+  @Column({ default: false })
+  isOfficial: boolean;
+
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 

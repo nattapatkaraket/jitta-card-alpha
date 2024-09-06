@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { DebtTypeEntity } from './entites/debt-type.entity';
+import { DebtType } from './entites/debt-type.entity';
 import { CreateDebtTypeDto } from './dto/create-debt-type.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
 import { UpdateDebtTypeDto } from './dto/update-debt-type.dto';
@@ -10,15 +10,15 @@ import { DeleteDebtTypeDto } from './dto/delete-debt-type.dto';
 @Injectable()
 export class DebtTypeService {
   constructor(
-    @InjectRepository(DebtTypeEntity)
-    private readonly debtTypeRepo: Repository<DebtTypeEntity>,
+    @InjectRepository(DebtType)
+    private readonly debtTypeRepo: Repository<DebtType>,
   ) {}
 
-  async getAll(): Promise<DebtTypeEntity[]> {
+  async getAll(): Promise<DebtType[]> {
     return this.debtTypeRepo.find();
   }
 
-  async getById(id: number): Promise<DebtTypeEntity | CommonResponseDto> {
+  async getById(id: number): Promise<DebtType | CommonResponseDto> {
     const debtType = await this.debtTypeRepo.findOneBy({ id });
     if (!debtType) {
       return {

@@ -21,4 +21,9 @@ export class UpdateJittaCardWalletDto {
   @IsBoolean()
   @IsOptional()
   isMain: boolean;
+
+  @ApiProperty({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  isOfficial: boolean;
 }

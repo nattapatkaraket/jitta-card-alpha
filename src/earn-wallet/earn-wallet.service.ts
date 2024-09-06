@@ -28,10 +28,13 @@ export class EarnWalletService {
         userId: body.userId,
       },
     });
+
     const initEarnWallet = {
+      id: body.id,
       userId: body.userId,
       balance: 0,
       isMain: !existingEarnWallet,
+      isOfficial: body.isOfficial,
     };
     const newEarnWallet = this.earnWalletRepo.create(initEarnWallet);
     const result = await this.earnWalletRepo.save(newEarnWallet);

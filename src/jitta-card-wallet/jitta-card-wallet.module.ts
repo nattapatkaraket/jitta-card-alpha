@@ -4,10 +4,10 @@ import { JittaCardWalletController } from './jitta-card-wallet.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JittaCardWallet } from './entities/jitta-card-wallet.entity';
 import { TransactionModule } from 'src/transaction/transaction.module';
-import { DebtEntity } from 'src/debt/entities/debt.entity';
+import { Debt } from 'src/debt/entities/debt.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([JittaCardWallet, DebtEntity]), TransactionModule],
+  imports: [TypeOrmModule.forFeature([JittaCardWallet, Debt]), TransactionModule],
   providers: [JittaCardWalletService],
   controllers: [JittaCardWalletController],
   exports: [JittaCardWalletService],

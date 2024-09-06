@@ -42,10 +42,14 @@ export class UserService {
     const result = await this.userRepo.save(newUser);
     const createJittaCardWalletResult = await this.jittaCardWalletService.create({
       userId: result.id,
+      isOfficial: result.isOfficial,
     });
     const createEarnWalletResult = await this.earnWalletService.create({
+      id: createJittaCardWalletResult.id,
       userId: result.id,
+      isOfficial: result.isOfficial,
     });
+
     if (
       result &&
       createJittaCardWalletResult.statusCode === 201 &&

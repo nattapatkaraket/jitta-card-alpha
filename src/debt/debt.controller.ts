@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { DebtService } from './debt.service';
-import { DebtEntity } from './entities/debt.entity';
+import { Debt } from './entities/debt.entity';
 import { CreateDebtDto } from './dto/create-debt.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
 import { UpdateDebtDto } from './dto/update-debt.dto';
@@ -12,17 +12,17 @@ export class DebtController {
   constructor(private readonly debtService: DebtService) {}
 
   @Get()
-  async getAll(): Promise<DebtEntity[]> {
+  async getAll(): Promise<Debt[]> {
     return this.debtService.getAll();
   }
 
   @Get(':id')
-  async getById(@Param('id') id: number): Promise<DebtEntity> {
+  async getById(@Param('id') id: number): Promise<Debt> {
     return this.debtService.getById(id);
   }
 
   @Get('user/:userId')
-  async getByUserId(@Param('userId') userId: number): Promise<DebtEntity[]> {
+  async getByUserId(@Param('userId') userId: number): Promise<Debt[]> {
     return this.debtService.getByUserId(userId);
   }
 

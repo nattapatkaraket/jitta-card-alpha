@@ -7,18 +7,18 @@ import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
 import { UpdateJittaCardWalletDto } from './dto/update-jitta-card-wallet.dto';
 import { DisplayResDto } from './dto/display-res.dto';
 import { TransactionService } from 'src/transaction/transaction.service';
-import { DebtService } from 'src/debt/debt.service';
-import { totalDebt } from 'src/debt/utils/helper';
 import { totalJittaBalance } from './utils/helper';
-import { DebtEntity } from 'src/debt/entities/debt.entity';
+import { Debt } from 'src/debt/entities/debt.entity';
+import { totalUnpaidDebt } from 'src/debt/utils/helper';
+import { CreateJittaRes } from './dto/create-res.dto';
 
 @Injectable()
 export class JittaCardWalletService {
   constructor(
     @InjectRepository(JittaCardWallet)
     private readonly jittaCardWalletRepo: Repository<JittaCardWallet>,
-    @InjectRepository(DebtEntity)
-    private readonly debtRepo: Repository<DebtEntity>,
+    @InjectRepository(Debt)
+    private readonly debtRepo: Repository<Debt>,
     private readonly transactionService: TransactionService,
   ) {}
 
@@ -46,7 +46,7 @@ export class JittaCardWalletService {
       return {
         userId,
         totalBalance: totalJittaBalance(jittaCardWallets),
-        totalDebt: totalDebt(debts),
+        totalDebt: totalUnpaidDebt(debts),
         historys: transactions,
         debts,
         jittaCardWallets,
@@ -62,7 +62,7 @@ export class JittaCardWalletService {
     });
   }
 
-  async create(jittaCardWallet: CreateJittaCardWalletDto): Promise<CommonResponseDto> {
+  async create(jittaCardWallet: CreateJittaCardWalletDto): Promise<CreateJittaRes> {
     // check existing jitta card wallet
     const existingJittaCardWallet = await this.jittaCardWalletRepo.findOne({
       where: {
@@ -74,19 +74,22 @@ export class JittaCardWalletService {
       balance: 0,
       isRoundUp: false,
       isMain: !existingJittaCardWallet,
+      isOfficial: jittaCardWallet.isOfficial,
     };
     const newJittaCardWallet = this.jittaCardWalletRepo.create(initJittaCardWallet);
     const result = await this.jittaCardWalletRepo.save(newJittaCardWallet);
 
     if (result) {
       return {
+        id: result.id,
         statusCode: 201,
         message: 'Jitta Card Wallet created successfully.',
       };
     } else {
       return {
-        statusCode: 500,
-        message: 'Internal server error.',
+        id: -1,
+        statusCode: 400,
+        message: 'Jitta Card Wallet creation failed.',
       };
     }
   }
