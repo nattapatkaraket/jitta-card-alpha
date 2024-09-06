@@ -4,8 +4,7 @@ import { JittaCardWallet } from './entities/jitta-card-wallet.entity';
 import { Repository } from 'typeorm';
 import { CreateJittaCardWalletDto } from './dto/create-jitta-card-wallet.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
-import { DepositDto } from './dto/deposit.dto';
-import { WithDrawDto } from './dto/withdraw.dto';
+import { UpdateJittaCardWalletDto } from './dto/update-jitta-card-wallet.dto';
 
 @Injectable()
 export class JittaCardWalletService {
@@ -44,40 +43,28 @@ export class JittaCardWalletService {
     }
   }
 
-  async deposit(body: DepositDto): Promise<CommonResponseDto> {
+  async update(body: UpdateJittaCardWalletDto): Promise<CommonResponseDto> {
     const jittaCardWallet = await this.jittaCardWalletRepo.findOne({
       where: {
-        id: body.walletId,
+        id: body.id,
       },
     });
-    jittaCardWallet.balance += body.amount;
-    const result = await this.jittaCardWalletRepo.save(jittaCardWallet);
 
-    if (result) {
+    if (!jittaCardWallet) {
       return {
-        statusCode: 200,
-        message: 'Deposit successful.',
-      };
-    } else {
-      return {
-        statusCode: 500,
-        message: 'Internal server error.',
+        statusCode: 404,
+        message: 'Jitta Card Wallet not found.',
       };
     }
-  }
 
-  async withdraw(body: WithDrawDto): Promise<CommonResponseDto> {
-    const jittaCardWallet = await this.jittaCardWalletRepo.findOne({
-      where: {
-        id: body.walletId,
-      },
-    });
-    jittaCardWallet.balance -= body.amount;
+    if (body.isRoundUp) jittaCardWallet.isRoundUp = body.isRoundUp;
+    if (body.balance) jittaCardWallet.balance = body.balance;
     const result = await this.jittaCardWalletRepo.save(jittaCardWallet);
+
     if (result) {
       return {
         statusCode: 200,
-        message: 'Withdraw successful.',
+        message: 'Jitta Card Wallet updated successfully.',
       };
     } else {
       return {

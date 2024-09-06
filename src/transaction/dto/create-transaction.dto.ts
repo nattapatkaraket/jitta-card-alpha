@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { TransactionType } from '../models/transaction.enum';
+import { FromType, ToType, TransactionType } from '../models/transaction.enum';
 
 export class CreateTransactionDto {
   // type_id, from, to, user_id
@@ -15,15 +15,25 @@ export class CreateTransactionDto {
   @IsNotEmpty()
   amount: number;
 
-  @ApiProperty({ example: '1', required: true })
+  @ApiProperty({ example: FromType.OUTSIDE, required: true })
   @IsString()
   @IsNotEmpty()
-  from: string;
+  from: FromType;
 
-  @ApiProperty({ example: '2', required: true })
+  @ApiProperty({ example: -1, required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  fromValue: number;
+
+  @ApiProperty({ example: ToType.JITTACARD_WALLET, required: true })
   @IsString()
   @IsNotEmpty()
-  to: string;
+  to: ToType;
+
+  @ApiProperty({ example: 1, required: true })
+  @IsNumber()
+  @IsNotEmpty()
+  toValue: number;
 
   @ApiProperty({ example: TransactionType.DEPOSIT, required: true })
   @IsNotEmpty()

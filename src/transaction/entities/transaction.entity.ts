@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { TransactionType } from '../models/transaction.enum';
+import { FromType, ToType, TransactionType } from '../models/transaction.enum';
 
 @Entity()
 export class Transaction {
@@ -16,11 +16,28 @@ export class Transaction {
   @Column()
   userId: number;
 
-  @Column()
-  from: string;
+  @Column({ default: 0 })
+  amount: number;
+
+  @Column({
+    type: 'enum',
+    enum: FromType,
+    default: FromType.JITTACARD_WALLET,
+  })
+  from: FromType;
 
   @Column()
-  to: string;
+  fromValue: number;
+
+  @Column({
+    type: 'enum',
+    enum: ToType,
+    default: ToType.JITTACARD_WALLET,
+  })
+  to: ToType;
+
+  @Column()
+  toValue: number;
 
   @Column({
     type: 'enum',

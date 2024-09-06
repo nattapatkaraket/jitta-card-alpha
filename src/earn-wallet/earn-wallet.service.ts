@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EarnWallet } from './entities/earn-wallet.entity';
 import { Repository } from 'typeorm';
-import { CreateEarnWalletDto } from './dto/create-jitta-card-wallet.dto';
+import { CreateEarnWalletDto } from './dto/create-earn-wallet.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
-import { DepositDto } from './dto/deposit.dto';
-import { WithDrawDto } from './dto/withdraw.dto';
+import { UpdateEarnWalletDto } from './dto/update-earn-wallet.dto';
 
 @Injectable()
 export class EarnWalletService {
@@ -37,51 +36,38 @@ export class EarnWalletService {
       };
     } else {
       return {
-        statusCode: 500,
-        message: 'Internal server error.',
+        statusCode: 400,
+        message: 'Cannot create Earn Wallet.',
       };
     }
   }
 
-  async deposit(body: DepositDto): Promise<CommonResponseDto> {
-    const jittaCardWallet = await this.earnWalletRepo.findOne({
+  async update(body: UpdateEarnWalletDto): Promise<CommonResponseDto> {
+    const earnWallet = await this.earnWalletRepo.findOne({
       where: {
-        id: body.walletId,
+        id: body.id,
       },
     });
-    jittaCardWallet.balance += body.amount;
-    const result = await this.earnWalletRepo.save(jittaCardWallet);
 
-    if (result) {
+    if (!earnWallet) {
       return {
-        statusCode: 200,
-        message: 'Deposit successful.',
-      };
-    } else {
-      return {
-        statusCode: 500,
-        message: 'Internal server error.',
+        statusCode: 404,
+        message: 'Earn Wallet not found.',
       };
     }
-  }
 
-  async withdraw(body: WithDrawDto): Promise<CommonResponseDto> {
-    const jittaCardWallet = await this.earnWalletRepo.findOne({
-      where: {
-        id: body.walletId,
-      },
-    });
-    jittaCardWallet.balance -= body.amount;
-    const result = await this.earnWalletRepo.save(jittaCardWallet);
+    if (body.balance) earnWallet.balance = body.balance;
+    const result = await this.earnWalletRepo.save(earnWallet);
+
     if (result) {
       return {
         statusCode: 200,
-        message: 'Withdraw successful.',
+        message: 'Earn Wallet updated successfully.',
       };
     } else {
       return {
-        statusCode: 500,
-        message: 'Internal server error.',
+        statusCode: 400,
+        message: 'Cannot update Earn Wallet.',
       };
     }
   }

@@ -3,9 +3,8 @@ import { JittaCardWalletService } from './jitta-card-wallet.service';
 import { JittaCardWallet } from './entities/jitta-card-wallet.entity';
 import { CreateJittaCardWalletDto } from './dto/create-jitta-card-wallet.dto';
 import { CommonResponseDto } from 'src/libs/common-dto/common-response.dto';
-import { DepositDto } from './dto/deposit.dto';
-import { WithDrawDto } from './dto/withdraw.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { UpdateJittaCardWalletDto } from './dto/update-jitta-card-wallet.dto';
 
 @ApiTags('jitta-card-wallet')
 @Controller('jitta-card-wallet')
@@ -22,13 +21,8 @@ export class JittaCardWalletController {
     return this.jittaCardWalletService.create(jittaCardWallet);
   }
 
-  @Patch('deposit')
-  async deposit(@Body() body: DepositDto): Promise<CommonResponseDto> {
-    return this.jittaCardWalletService.deposit(body);
-  }
-
-  @Patch('withdraw')
-  async withdraw(@Body() body: WithDrawDto): Promise<CommonResponseDto> {
-    return this.jittaCardWalletService.withdraw(body);
+  @Patch()
+  async update(@Body() body: UpdateJittaCardWalletDto): Promise<CommonResponseDto> {
+    return this.jittaCardWalletService.update(body);
   }
 }

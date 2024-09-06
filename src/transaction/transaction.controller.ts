@@ -19,6 +19,12 @@ export class TransactionController {
      4. โอนเงิน (transfer)
      5. ยิมเงิน (loan)
      6. ชำระหนี้ (debt payment)
+
+     # from type and to type
+     1. JittaCardWallet
+     2. EarnWallet
+     3. Outside
+     4. Debt
   `,
   })
   @Post()

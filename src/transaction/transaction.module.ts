@@ -3,11 +3,12 @@ import { TransactionService } from './transaction.service';
 import { TransactionController } from './transaction.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Transaction } from './entities/transaction.entity';
-import { JittaCardWalletModule } from 'src/jitta-card-wallet/jitta-card-wallet.module';
-import { EarnWalletModule } from 'src/earn-wallet/earn-wallet.module';
+import { JittaCardWallet } from 'src/jitta-card-wallet/entities/jitta-card-wallet.entity';
+import { EarnWallet } from 'src/earn-wallet/entities/earn-wallet.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Transaction]), JittaCardWalletModule, EarnWalletModule],
+  imports: [TypeOrmModule.forFeature([Transaction, JittaCardWallet, EarnWallet, User])],
   providers: [TransactionService],
   controllers: [TransactionController],
 })
