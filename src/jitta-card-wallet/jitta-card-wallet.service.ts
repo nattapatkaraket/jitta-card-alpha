@@ -117,8 +117,8 @@ export class JittaCardWalletService {
       };
     } else {
       return {
-        statusCode: 500,
-        message: 'Internal server error.',
+        statusCode: 400,
+        message: 'Jitta Card Wallet update failed.',
       };
     }
   }

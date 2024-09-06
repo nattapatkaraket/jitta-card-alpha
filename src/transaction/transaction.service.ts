@@ -41,6 +41,9 @@ export class TransactionService {
       where: {
         userId,
       },
+      order: {
+        createdAt: 'ASC',
+      },
     });
   }
 
