@@ -74,4 +74,16 @@ export const TransactionStatusType = {
     isTransactionSuccess: false,
     message: 'Invalid transaction type.',
   },
+  LOAN_LIMIT_EXCEED: {
+    isTransactionSuccess: false,
+    message: 'Loan limit exceed',
+  },
+  DEBT_NOT_FOUND: {
+    isTransactionSuccess: false,
+    message: 'Debt not found',
+  },
+  DEBT_TYPE_NOT_FOUND: {
+    isTransactionSuccess: false,
+    message: 'Debt type not found',
+  },
 } as const;

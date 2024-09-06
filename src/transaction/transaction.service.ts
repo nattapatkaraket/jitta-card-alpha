@@ -14,6 +14,9 @@ import { JittaCardWallet } from 'src/jitta-card-wallet/entities/jitta-card-walle
 import { EarnWallet } from 'src/earn-wallet/entities/earn-wallet.entity';
 import { User } from 'src/user/entities/user.entity';
 import { TransactionStatus } from './models/transaction.interface';
+import { checkLoanLimit } from 'src/debt/utils/helper';
+import { DebtEntity } from 'src/debt/entities/debt.entity';
+import { DebtTypeEntity } from 'src/debt-type/entites/debt-type.entity';
 
 @Injectable()
 export class TransactionService {
@@ -26,6 +29,10 @@ export class TransactionService {
     private readonly earnWalletRepo: Repository<EarnWallet>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(DebtTypeEntity)
+    private readonly debtTypeRepo: Repository<DebtTypeEntity>,
+    @InjectRepository(DebtEntity)
+    private readonly debtRepo: Repository<DebtEntity>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -158,13 +165,14 @@ export class TransactionService {
       });
       await queryRunner.manager.save(newTransaction);
 
-      await queryRunner.manager.update(JittaCardWallet, body.fromValue, {
-        balance: fromWallet.balance - body.amount,
-      });
-
-      await queryRunner.manager.update(JittaCardWallet, body.toValue, {
-        balance: toWallet.balance + body.amount,
-      });
+      await Promise.all([
+        queryRunner.manager.update(JittaCardWallet, body.toValue, {
+          balance: toWallet.balance + body.amount,
+        }),
+        queryRunner.manager.update(JittaCardWallet, body.fromValue, {
+          balance: fromWallet.balance - body.amount,
+        }),
+      ]);
 
       await queryRunner.commitTransaction();
       return TransactionStatusType.SUCCESS;
@@ -251,6 +259,152 @@ export class TransactionService {
     }
   }
 
+  async TakeLoan(body: CreateTransactionDto): Promise<TransactionStatus> {
+    // handle loan validation
+    // jitta account from jitta card
+    if (body.from !== FromType.JITTACARD_WALLET) return TransactionStatusType.INVALID_FROM_TYPE;
+    if (body.to !== ToType.JITTACARD_WALLET) return TransactionStatusType.INVALID_TO_TYPE;
+    // debt type exist
+    const debtType = await this.debtTypeRepo.findOne({
+      where: {
+        id: body.debtTypeId,
+      },
+    });
+    if (!debtType) return TransactionStatusType.DEBT_TYPE_NOT_FOUND;
+
+    // wallet exist
+    const fromWallet = await this.jittaCardWalletRepo.findOne({
+      where: {
+        id: body.fromValue,
+      },
+    });
+    const toWallet = await this.jittaCardWalletRepo.findOne({
+      where: {
+        id: body.toValue,
+      },
+    });
+    if (!fromWallet || !toWallet) return TransactionStatusType.JITTA_WALLET_NOT_FOUND;
+
+    // check balance
+    if (fromWallet.balance < body.amount) return TransactionStatusType.INSUFFICIENT_BALANCE;
+
+    // check loan limit
+    if (checkLoanLimit(body.amount, fromWallet) === false)
+      return TransactionStatusType.LOAN_LIMIT_EXCEED;
+
+    // start transaction
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const newTransaction = queryRunner.manager.create(Transaction, {
+        userId: body.userId,
+        amount: body.amount,
+        from: body.from,
+        fromValue: body.fromValue,
+        to: body.to,
+        toValue: body.toValue,
+        transactionType: body.transactionType,
+      });
+      await queryRunner.manager.save(newTransaction);
+
+      await Promise.all([
+        queryRunner.manager.update(JittaCardWallet, body.toValue, {
+          balance: fromWallet.balance + body.amount,
+        }),
+        queryRunner.manager.update(JittaCardWallet, body.fromValue, {
+          balance: toWallet.balance - body.amount,
+        }),
+        // create debt
+        queryRunner.manager.create(DebtEntity, {
+          userId: body.userId,
+          total: body.amount,
+          paid: 0,
+          debtFrom: body.fromValue,
+          debtTypeId: body.debtTypeId,
+        }),
+      ]);
+
+      await queryRunner.commitTransaction();
+      return TransactionStatusType.SUCCESS;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      return TransactionStatusType.FAIL;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async PayLoan(body: CreateTransactionDto): Promise<TransactionStatus> {
+    // handle pay loan validation
+    if (body.from !== FromType.JITTACARD_WALLET) return TransactionStatusType.INVALID_FROM_TYPE;
+    if (body.to !== ToType.DEBT) return TransactionStatusType.INVALID_TO_TYPE;
+    // debt exist
+    const debt = await this.debtRepo.findOne({
+      where: {
+        id: body.toValue,
+      },
+    });
+    if (!debt) return TransactionStatusType.DEBT_NOT_FOUND;
+
+    // wallet exist
+    const fromWallet = await this.jittaCardWalletRepo.findOne({
+      where: {
+        id: body.fromValue,
+      },
+    });
+    const debtWallet = await this.jittaCardWalletRepo.findOne({
+      where: {
+        id: debt.debtFrom,
+      },
+    });
+    if (!fromWallet || !debtWallet) return TransactionStatusType.JITTA_WALLET_NOT_FOUND;
+
+    // check balance
+    if (fromWallet.balance < body.amount) return TransactionStatusType.INSUFFICIENT_BALANCE;
+
+    // start transaction
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const newTransaction = queryRunner.manager.create(Transaction, {
+        userId: body.userId,
+        amount: body.amount,
+        from: body.from,
+        fromValue: body.fromValue,
+        to: body.to,
+        toValue: body.toValue,
+        transactionType: body.transactionType,
+      });
+      await queryRunner.manager.save(newTransaction);
+
+      // check paid amount > debt total + paid amount
+      // if true then change paid amount to debt total - paid amount
+      if (debt.total - debt.paid < body.amount) body.amount = debt.total - debt.paid;
+      await Promise.all([
+        queryRunner.manager.update(JittaCardWallet, body.toValue, {
+          balance: fromWallet.balance - body.amount,
+        }),
+        queryRunner.manager.update(JittaCardWallet, body.fromValue, {
+          balance: debtWallet.balance + body.amount,
+        }),
+        // update debt
+        queryRunner.manager.update(DebtEntity, body.debtTypeId, {
+          paid: debt.paid + body.amount,
+        }),
+      ]);
+
+      await queryRunner.commitTransaction();
+      return TransactionStatusType.SUCCESS;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      return TransactionStatusType.FAIL;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   async create(body: CreateTransactionDto): Promise<CommonResponseDto> {
     // validate bad request
     // user exist
@@ -283,6 +437,12 @@ export class TransactionService {
         break;
       case TransactionType.PAY:
         transactionStatus = await this.makePayment(body);
+        break;
+      case TransactionType.LOAN:
+        transactionStatus = await this.TakeLoan(body);
+        break;
+      case TransactionType.DEBT_PAYMENT:
+        transactionStatus = await this.PayLoan(body);
         break;
       default:
         transactionStatus = TransactionStatusType.INVALID_TRANSACTION_TYPE;

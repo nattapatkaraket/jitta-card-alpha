@@ -28,7 +28,7 @@ export class DebtService {
   async getByUserId(userId: number): Promise<DebtEntity[]> {
     return this.debtRepo.find({
       where: {
-        user_id: userId,
+        userId: userId,
       },
     });
   }

@@ -12,16 +12,19 @@ export class DebtEntity {
   id: number;
 
   @Column()
-  user_id: number;
+  userId: number;
 
   @Column()
-  debt_type_id: number;
+  debtTypeId: number;
 
   @Column()
   total: number;
 
   @Column()
   paid: number;
+
+  @Column()
+  debtFrom: number;
 
   @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
