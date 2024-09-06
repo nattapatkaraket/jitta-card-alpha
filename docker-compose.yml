@@ -3,7 +3,7 @@ version: '3.5'
 services:
   db:
     image: postgres
-    # restart: always
+    restart: always
     env_file:
       - .env
     environment:
@@ -32,7 +32,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # restart: always
+    restart: always
     container_name: jitta-backend
     ports:
       - '3122:3122'
