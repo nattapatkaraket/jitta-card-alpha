@@ -18,7 +18,7 @@ export class DebtTypeController {
   }
 
   @Get(':id')
-  async getById(@Param('id') id: number): Promise<DebtTypeEntity> {
+  async getById(@Param('id') id: number): Promise<DebtTypeEntity | CommonResponseDto> {
     return this.debtTypeService.getById(id);
   }
 

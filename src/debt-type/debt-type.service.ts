@@ -18,10 +18,13 @@ export class DebtTypeService {
     return this.debtTypeRepo.find();
   }
 
-  async getById(id: number): Promise<DebtTypeEntity> {
+  async getById(id: number): Promise<DebtTypeEntity | CommonResponseDto> {
     const debtType = await this.debtTypeRepo.findOneBy({ id });
     if (!debtType) {
-      throw new NotFoundException('Debt type not found.');
+      return {
+        statusCode: 404,
+        message: 'Debt type not found.',
+      };
     }
     return this.debtTypeRepo.findOneBy({ id });
   }

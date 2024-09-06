@@ -17,6 +17,17 @@ export class UserService {
     private readonly earnWalletService: EarnWalletService,
   ) {}
 
+  async getById(id: number): Promise<User | CommonResponseDto> {
+    const user = await this.userRepo.findOneBy({ id });
+    if (!user) {
+      return {
+        statusCode: 404,
+        message: 'User not found.',
+      };
+    }
+    return user;
+  }
+
   async create(user: CreateUserDto): Promise<CommonResponseDto> {
     // check if user already exists
     const userExists = await this.userRepo.findOne({

@@ -10,5 +10,6 @@ import { EarnWalletModule } from 'src/earn-wallet/earn-wallet.module';
   imports: [TypeOrmModule.forFeature([User]), JittaCardWalletModule, EarnWalletModule],
   controllers: [UserController],
   providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule {}
