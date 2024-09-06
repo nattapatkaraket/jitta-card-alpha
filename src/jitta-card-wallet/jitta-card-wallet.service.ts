@@ -22,10 +22,17 @@ export class JittaCardWalletService {
   }
 
   async create(jittaCardWallet: CreateJittaCardWalletDto): Promise<CommonResponseDto> {
+    // check existing jitta card wallet
+    const existingJittaCardWallet = await this.jittaCardWalletRepo.findOne({
+      where: {
+        userId: jittaCardWallet.userId,
+      },
+    });
     const initJittaCardWallet = {
       userId: jittaCardWallet.userId,
       balance: 0,
       isRoundUp: false,
+      isMain: !existingJittaCardWallet,
     };
     const newJittaCardWallet = this.jittaCardWalletRepo.create(initJittaCardWallet);
     const result = await this.jittaCardWalletRepo.save(newJittaCardWallet);
@@ -59,6 +66,7 @@ export class JittaCardWalletService {
 
     if (body.isRoundUp) jittaCardWallet.isRoundUp = body.isRoundUp;
     if (body.balance) jittaCardWallet.balance = body.balance;
+    if (body.isMain) jittaCardWallet.isMain = body.isMain;
     const result = await this.jittaCardWalletRepo.save(jittaCardWallet);
 
     if (result) {

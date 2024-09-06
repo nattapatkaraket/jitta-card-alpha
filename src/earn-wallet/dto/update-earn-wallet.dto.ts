@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateEarnWalletDto {
   @ApiProperty({ example: 1, required: true })
@@ -11,4 +11,9 @@ export class UpdateEarnWalletDto {
   @IsNumber()
   @IsOptional()
   balance: number;
+
+  @ApiProperty({ example: false, required: true })
+  @IsOptional()
+  @IsBoolean()
+  isMain: boolean;
 }

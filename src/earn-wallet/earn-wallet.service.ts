@@ -22,9 +22,16 @@ export class EarnWalletService {
   }
 
   async create(body: CreateEarnWalletDto): Promise<CommonResponseDto> {
+    // check existing earn wallet
+    const existingEarnWallet = await this.earnWalletRepo.findOne({
+      where: {
+        userId: body.userId,
+      },
+    });
     const initEarnWallet = {
       userId: body.userId,
       balance: 0,
+      isMain: !existingEarnWallet,
     };
     const newEarnWallet = this.earnWalletRepo.create(initEarnWallet);
     const result = await this.earnWalletRepo.save(newEarnWallet);
@@ -57,6 +64,7 @@ export class EarnWalletService {
     }
 
     if (body.balance) earnWallet.balance = body.balance;
+    if (body.isMain) earnWallet.isMain = body.isMain;
     const result = await this.earnWalletRepo.save(earnWallet);
 
     if (result) {
